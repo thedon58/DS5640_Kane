@@ -1,11 +1,13 @@
 ---
 title: "Homework 1"
-author: Donald Kane
-date: January 27, 2022
-output: github_document
+author: "Donald Kane"
+date: "January 27, 2022"
+output:
+  html_document:
+    df_print: paged
 ---
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 library('class')
 library('dplyr')
 ```
@@ -36,13 +38,12 @@ eval(plot_mix_data)
 ```{r}
 ## fit linear classifier
 fit_lc <- function(y, x) {
-  x <- cbind(1, x)
-  beta <- drop(solve(t(x)%*%x)%*%t(x)%*%y)
+  beta <- coef((lm(y~x)))
 }
 
 ## make predictions from linear classifier
 predict_lc <- function(x, beta) {
-  cbind(1, x) %*% beta
+  cbind(1, x^2) %*% beta
 }
 
 ## fit model to mixture data and make predictions
@@ -62,6 +63,10 @@ lc_cont <- contourLines(dat$px1, dat$px2, lc_pred, levels=0.5)
 eval(plot_mix_data)
 sapply(lc_cont, lines)
 ```
+
+# Question 3
+
+This more flexible model affects the bias-variance tradeoff by allowing the model to capture a more complex underlying process. An infelxible model does not have this ability which leads to higher bias in the model. 
 
 ```{r}
 ## fit knn classifier
@@ -113,7 +118,9 @@ for(b in 1:3) {
   eval(plot_mix_data)
   sapply(lc_cont, lines)
 }
+```
 
+```{r}
 ## plot 5-NN classifier for three bootstraps
 par(mfrow=c(1,3))
 for(b in 1:3) {
@@ -133,7 +140,9 @@ for(b in 1:3) {
   eval(plot_mix_data)
   sapply(knn_cont, lines)
 }
+```
 
+```{r}
 ## plot 20-NN classifier for three bootstraps
 par(mfrow=c(1,3))
 for(b in 1:3) {
