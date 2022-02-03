@@ -266,11 +266,11 @@ legend(0, 4,
 
 ```{r}
 ## fit simple nonlinear model using numerical optimization
-fit_lin <- function(y, x, loss=L2_loss, beta_init = c(-0.51, 0.75)) {
+fit_lin <- function(y, x, loss=L2_loss, beta_init = c(-1.0, 0.0, -0.3)) {
   err <- function(beta){
     beta[1] + beta[2]*exp(-beta[3]*x)
   }
-  beta <- optim(par = c(-1.0, 0.0, -0.3) , fn = err)
+  beta <- optim(par = beta_init, fn = err)
   return(beta)
 }
 
