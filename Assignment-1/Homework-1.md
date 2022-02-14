@@ -88,4 +88,9 @@ This more flexible model affects the bias-variance tradeoff by allowing
 the model to capture a more complex underlying process. An infelxible
 model does not have this ability which leads to higher bias in the
 model. Using the squared terms added more bias, but reduced the overall
-variance of the model.
+variance of the model. As the model complexity increases, the variance
+increases while the bias decreases. The goal of using this bias-variance
+tradeoff is to minimize the test error of the model. The bias error
+comes from bad assumptions from the learning of the algorithm, while the
+variance term describes the sensitivity of the fluctuations in the
+training data.
