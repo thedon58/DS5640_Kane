@@ -11,43 +11,25 @@ February 22, 2022
 
 #### Suppose that we have a set of observations, each with measure- ments on p = 1 feature, X. We assume that X is uniformly (evenly) distributed on \[0, 1\]. Associated with each observation is a response value. Suppose that we wish to predict a test obser- vation’s response using only observations that are within 10 % of the range of X closest to that test observation. For instance, in order to predict the response for a test observation with X = 0.6, we will use observations in the range \[0.55,0.65\]. On average, what fraction of the available observations will we use to make the prediction?
 
-``` r
-(.05 + .06 + .07 + .08 + .09 + .1*90 + .09 + .08 + 0.07 + .06 + .05)
-```
-
-    ## [1] 9.7
-
 Because the values near the ends (0 and 1) cannot fully use the 10%
 rule, their values will be less. This applies to the values from 0 to
 0.04 and 0.96 to 1. So for value 0.01, it can only contain 6%. Above, I
 added up these values along with the 10% for the 90 values between 0.05
-and 0.95 and got an average of 9.7%.
+and 0.95 and got an average of 9.75%.
 
 ### 4.b
 
 #### Now suppose that we have a set of observations, each with measurements on p = 2 features, X1 and X2. We assume that (X1, X2) are uniformly distributed on \[0, 1\] × \[0, 1\]. We wish to predict a test observation’s response using only observations that are within 10 % of the range of X1 and within 10 % of the range of X2 closest to that test observation. For instance, in order to predict the response for a test observation with X1 = 0.6 and X2 = 0.35, we will use observations in the range \[0.55, 0.65\] for X1 and in the range \[0.3,0.4\] for X2. On average, what fraction of the available observations will we use to make the prediction?
 
 Using the average from question 4.a, when we use the formula (0.097)^p,
-we find out answer of 0.94%
-
-``` r
-0.097^2
-```
-
-    ## [1] 0.009409
+we find out answer of 0.95%
 
 ### 4.c
 
 #### Now suppose that we have a set of observations on p = 100 fea- tures. Again the observations are uniformly distributed on each feature, and again each feature ranges in value from 0 to 1. We wish to predict a test observation’s response using observations within the 10 % of each feature’s range that is closest to that test observation. What fraction of the available observations will we use to make the prediction?
 
-``` r
-(0.097^100)
-```
-
-    ## [1] 4.755251e-102
-
 Using the average from question 4.a, when we use the formula (0.097)^p,
-we find out answer of 4.755e-100%
+we find out answer of 7.952e-100%
 
 ### 4.d
 
@@ -56,8 +38,8 @@ we find out answer of 4.755e-100%
 Using the formula of (average percentage)^observations, we can see that
 as observations increase, the fraction of available observations we use
 to make the prediction decreases exponentially. With one observation we
-had 9.7%, with 2 observations we had 0.94%, and with 100 observations we
-only used 4.755e-100%.
+had 9.75%, with 2 observations we had 0.95%, and with 100 observations
+we only used 7.952e-100%.
 
 ### 4.e
 
@@ -65,29 +47,11 @@ only used 4.755e-100%.
 
 To make a prediction for a test observation by creating a p-dimensional
 hypercube, the only change we need to make is in the exponent. Our new
-formula (0.097)^(1/p) will show an exponential growth for the fraction
+formula (0.0975)^(1/p) will show an exponential growth for the fraction
 of available observations we use to make the prediction. Below we can
-see the calculations. p = 1: 9.7% p = 2: 31.1% p = 100: 97.7% This tells
-us that the higher the observations, the longer the sides are and the
-further the nearest neighbor is.
-
-``` r
-(0.097)^(1/1)
-```
-
-    ## [1] 0.097
-
-``` r
-(0.097)^(1/2)
-```
-
-    ## [1] 0.3114482
-
-``` r
-(0.097)^(1/100)
-```
-
-    ## [1] 0.9769396
+see the calculations. p = 1: 9.75% p = 2: 31.2% p = 100: 97.7% This
+tells us that the higher the observations, the longer the sides are and
+the further the nearest neighbor is.
 
 # Exercise 13
 
@@ -381,20 +345,40 @@ mean(qda_class == Direction.2008)
 #### Repeat (d) using KNN with K = 1.
 
 ``` r
-#train.X <- cbind(Weekly$Lag1, Weekly$Lag2)[train, ]
-#test.X <- cbind(Weekly$Lag1, Weekly$Lag2)[!train]
-#train.Direction <- Weekly$Direction[train]
+train <- subset(Weekly, Weekly$Year <= 2008)
+test <- subset(Weekly, Weekly$Year > 2008)
+log_fit <- glm(Direction ~ Lag2, data=train, family=binomial)
 
-#set.seed(1)
-#knn_pred <- knn(train.X, test.X, train.Direction, k = 1)
-#table(knn_pred, Direction.2008)
+set.seed(1)
+knn_pred <- knn(as.data.frame(train$Lag2), as.data.frame(test$Lag2), train$Direction, k = 1)
+table(knn_pred, Direction.2008)
 ```
+
+    ##         Direction.2008
+    ## knn_pred Down Up
+    ##     Down   21 30
+    ##     Up     22 31
+
+``` r
+mean(knn_pred == test$Direction)
+```
+
+    ## [1] 0.5
 
 ### 13.h
 
 #### Repeat (d) using naive Bayes.
 
 ``` r
+train <- (Weekly$Year <= 2008)
+Weekly.2008 <- Weekly[!train,]
+dim(Weekly.2008)
+```
+
+    ## [1] 104   9
+
+``` r
+Direction.2008 <- Direction[!train]
 nb_fit <- naiveBayes(Direction ~ Lag2, data = Weekly, subset = train)
 nb_fit
 ```
@@ -437,8 +421,119 @@ mean(nb_class == Direction.2008)
 #### Which of these methods appears to provide the best results on this data?
 
 Based on the models ran, our best results come from either the QDA model
-or the LDA. (KNN model not running)
+or the LDA.
 
 ### 13.j
 
 #### Experiment with different combinations of predictors, includ- ing possible transformations and interactions, for each of the methods. Report the variables, method, and associated confu- sion matrix that appears to provide the best results on the held out data. Note that you should also experiment with values for K in the KNN classifier.
+
+``` r
+#KNN, k = 2
+train <- subset(Weekly, Weekly$Year <= 2008)
+test <- subset(Weekly, Weekly$Year > 2008)
+log_fit <- glm(Direction ~ Lag2, data=train, family=binomial)
+
+set.seed(1)
+knn_pred <- knn(as.data.frame(train$Lag2), as.data.frame(test$Lag2), train$Direction, k = 2)
+table(knn_pred, Direction.2008)
+```
+
+    ##         Direction.2008
+    ## knn_pred Down Up
+    ##     Down   19 27
+    ##     Up     24 34
+
+``` r
+mean(knn_pred == test$Direction)
+```
+
+    ## [1] 0.5096154
+
+With k = 2, the model runs slightly better than its counterpart with k =
+1.
+
+``` r
+# LDA
+
+lda_fits <- lda(Direction ~ Lag1 + Lag2, data = train)
+lda_fits
+```
+
+    ## Call:
+    ## lda(Direction ~ Lag1 + Lag2, data = train)
+    ## 
+    ## Prior probabilities of groups:
+    ##      Down        Up 
+    ## 0.4477157 0.5522843 
+    ## 
+    ## Group means:
+    ##              Lag1        Lag2
+    ## Down  0.289444444 -0.03568254
+    ## Up   -0.009213235  0.26036581
+    ## 
+    ## Coefficients of linear discriminants:
+    ##             LD1
+    ## Lag1 -0.3013148
+    ## Lag2  0.2982579
+
+``` r
+lda_pred <- predict(lda_fits, Weekly.2008)
+names(lda_pred)
+```
+
+    ## [1] "class"     "posterior" "x"
+
+``` r
+lda_class <- lda_pred$class
+table(lda_class, Direction.2008)
+```
+
+    ##          Direction.2008
+    ## lda_class Down Up
+    ##      Down    7  8
+    ##      Up     36 53
+
+``` r
+mean(lda_class == Direction.2008)
+```
+
+    ## [1] 0.5769231
+
+With adding Lag1 to the LDA model, we can see that the model performs
+significantly worse than what we did in 13.e.
+
+``` r
+qda_fit <- qda(Direction ~ Lag1 + Lag2, data = train)
+qda_fit
+```
+
+    ## Call:
+    ## qda(Direction ~ Lag1 + Lag2, data = train)
+    ## 
+    ## Prior probabilities of groups:
+    ##      Down        Up 
+    ## 0.4477157 0.5522843 
+    ## 
+    ## Group means:
+    ##              Lag1        Lag2
+    ## Down  0.289444444 -0.03568254
+    ## Up   -0.009213235  0.26036581
+
+``` r
+qda_class <- predict(qda_fit, Weekly.2008)$class
+table(qda_class, Direction.2008)
+```
+
+    ##          Direction.2008
+    ## qda_class Down Up
+    ##      Down    7 10
+    ##      Up     36 51
+
+``` r
+mean(qda_class == Direction.2008)
+```
+
+    ## [1] 0.5576923
+
+With adding Lag1 to the QDA model, we can see that the model performs
+slightly worse than what we did in 13.e.
