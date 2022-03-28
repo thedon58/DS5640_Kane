@@ -1,7 +1,7 @@
 Homework 5
 ================
 Donald Kane
-February 22, 2022
+March 3, 2022
 
 ``` r
 library('MASS') ## for 'mcycle'
