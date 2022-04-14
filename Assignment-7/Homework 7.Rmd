@@ -1,0 +1,7 @@
+---
+title: "Homework 7"
+author: "Donald Kane"
+date: "April 14, 2022"
+output:
+  github_document
+---
