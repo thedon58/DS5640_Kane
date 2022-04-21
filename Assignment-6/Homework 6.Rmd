@@ -9,6 +9,7 @@ output:
 ```{r message=FALSE, warning=FALSE}
 #install.packages("randomForest")
 library(randomForest)
+library(caret)
 ```
 
 ```{r}
@@ -41,14 +42,37 @@ varImpPlot(fit)     ## variable importance plot
 ### Use 5-fold CV and tune the model by performing a grid search for the following tuning parameters: 1) the number of variables randomly sampled as candidates at each split; consider values 3, 4, and 5, and 2) the minimum size of terminal nodes; consider a sequence (1, 5, 10, 20, 40, and 80).
 
 ```{r}
-
+candidates <- c(3,4,5)
+nodes <- c(5,10,20,40,80)
+control = trainControl(method = 'cv', 
+                       number = 5, 
+                       search = 'grid')
+tunegrid = expand.grid(mtry = candidates, 
+                       min.node.size = nodes, 
+                       splitrule = 'gini')
+fit = train(y~.,
+                  data = train,
+                  metric = 'Accuracy',
+                  method = 'ranger',
+                  tuneGrid=tunegrid,
+                  trControl=control)
+fit
 ```
 
 # Question 5
 ### With the tuned model, make predictions using the majority vote method, and compute the misclassification rate using the ‘vowel.test’ data.
 
 ```{r}
-
+test = read.csv(url("https://web.stanford.edu/~hastie/ElemStatLearn/datasets/vowel.test"))
+set.seed(23188)
+fit = randomForest(y~., 
+                   data = train, 
+                   mtry = 3, 
+                   nodesize = 1)
+test = test[,2:ncol(test)]
+test$y = as.factor(test$y)
+preds = predict(fit, newdata = test)
+confusionMatrix(test$y,preds)
 ```
 
 
